@@ -1,0 +1,45 @@
+# Receive signals over gRPC and HTTP
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+  hostmetrics:
+    collection_interval: 10s
+    scrapers:
+      # CPU utilization metrics
+      cpu:
+      # Disk I/O metrics
+      disk:
+      # File System utilization metrics
+      filesystem:
+      # CPU load metrics
+      load:
+      # Memory utilization metrics
+      memory:
+      # Network interface I/O metrics & TCP connection metrics
+      network:
+      # Paging/Swap space utilization and I/O metrics
+      paging:
+# Establish an endpoint for Prometheus to scrape from
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+  debug:
+    verbosity: detailed
+  otlphttp:
+    endpoint: http://loki:3100/otlp/
+  otlp:
+    endpoint: tempo:4318
+service:
+  pipelines:
+    traces:
+      receivers: [ otlp ]
+      exporters: [ otlp ]
+    metrics:
+      receivers: [otlp, hostmetrics]
+      exporters: [prometheus]
+    logs:
+      receivers: [ otlp ]
+      exporters: [ otlphttp, debug ]
